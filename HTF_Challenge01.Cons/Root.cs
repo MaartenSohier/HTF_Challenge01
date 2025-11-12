@@ -15,3 +15,21 @@ public class Root
     [JsonPropertyName("buoyancy")]
     public Buoyancy Buoyancy { get; set; }
 }
+
+public class Buoyancy
+{
+    [JsonPropertyName("submarineMass")]
+    public double SubmarineMass { get; set; }
+
+    [JsonPropertyName("centerOfMassOffset")]
+    public double CenterOfMassOffset { get; set; }
+
+    [JsonPropertyName("tankDistance")]
+    public double TankDistance { get; set; }
+}
+
+public class Pressure
+{
+    [JsonPropertyName("depth")]
+    public int Depth { get; set; }
+}
