@@ -29,14 +29,11 @@ class Program
         Console.WriteLine($"\nEncrypted: {encryptedMessage}");
         Console.WriteLine($"Shift: {shift}");
 
-        // Step 3: Decrypt the message
         string decryptedMessage = DecryptCaesar(encryptedMessage, shift);
 
         Console.WriteLine($"Decrypted: {decryptedMessage}");
 
-        // Step 4: POST the answer back
-        Console.WriteLine("\nSending answer...");
-
+        //POST
         var answerData = new { answer = decryptedMessage };
         var jsonContent = new StringContent(
             JsonSerializer.Serialize(answerData),
