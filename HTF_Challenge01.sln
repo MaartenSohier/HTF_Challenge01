@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36511.14 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTF_Challenge01.Cons", "HTF_Challenge01.Cons\HTF_Challenge01.Cons.csproj", "{F24569F2-040F-485C-B8E7-87E85779BE0F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F24569F2-040F-485C-B8E7-87E85779BE0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F24569F2-040F-485C-B8E7-87E85779BE0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F24569F2-040F-485C-B8E7-87E85779BE0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F24569F2-040F-485C-B8E7-87E85779BE0F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {44FC9464-F628-40D6-8644-E70C96A1E40B}
+	EndGlobalSection
+EndGlobal
