@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
@@ -7,30 +8,35 @@ class Program
     static async Task Main(string[] args)
     {
         string baseUrl = "https://exs-htf-2025.azurewebsites.net";
-        string teamKey = "97f4a7df-b18d-46fc-9f42-2b0193bbfabd"; 
+        string teamKey = "97f4a7df-b18d-46fc-9f42-2b0193bbfabd";
 
-        using HttpClient client = new HttpClient();
-        client.DefaultRequestHeaders.Add("Authorization", $"Team {teamKey}");
+        using HttpClient client = new();
 
-        // Step 1: Get the encrypted signal
+        client.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Team", $"{teamKey}");
+
         var response = await client.GetAsync($"{baseUrl}/api/challenges/signal?isTest=true");
         var jsonResponse = await response.Content.ReadAsStringAsync();
 
-        Console.WriteLine("Encrypted signal received:");
+        Console.WriteLine("Response:");
         Console.WriteLine(jsonResponse);
 
-        // Parse the response to get the encrypted message
         var signalData = JsonSerializer.Deserialize<SignalResponse>(jsonResponse);
-        string encryptedMessage = signalData?.Signal ?? "";
+
+        string encryptedMessage = signalData?.CipherText ?? "";
+        int shift = signalData?.Shift ?? 0;
 
         Console.WriteLine($"\nEncrypted: {encryptedMessage}");
+        Console.WriteLine($"Shift: {shift}");
 
-        // Step 2: Decrypt using Caesar cipher
-        string decryptedMessage = DecryptCaesar(encryptedMessage);
+        // Step 3: Decrypt the message
+        string decryptedMessage = DecryptCaesar(encryptedMessage, shift);
 
         Console.WriteLine($"Decrypted: {decryptedMessage}");
 
-        // Step 3: POST the answer back
+        // Step 4: POST the answer back
+        Console.WriteLine("\nSending answer...");
+
         var answerData = new { answer = decryptedMessage };
         var jsonContent = new StringContent(
             JsonSerializer.Serialize(answerData),
@@ -41,50 +47,31 @@ class Program
         var postResponse = await client.PostAsync($"{baseUrl}/api/challenges/signal", jsonContent);
         var result = await postResponse.Content.ReadAsStringAsync();
 
-        Console.WriteLine($"\nAPI Response: {result}");
+        Console.WriteLine($"API Response: {result}");
     }
 
-    static string DecryptCaesar(string encrypted)
+    static string DecryptCaesar(string text, int shift)
     {
-        // Try all possible shifts (1-25)
-        for (int shift = 1; shift <= 25; shift++)
-        {
-            string decrypted = ShiftText(encrypted, -shift);
-            Console.WriteLine($"Shift {shift}: {decrypted}");
-
-            // You can manually check which one makes sense
-            // Or implement logic to detect Dutch words
-        }
-
-        // Return the one that makes sense (you'll need to identify it)
-        // For now, try shift 3 (common for Caesar cipher)
-        return ShiftText(encrypted, -3);
-    }
-
-    static string ShiftText(string text, int shift)
-    {
-        StringBuilder result = new StringBuilder();
+        string result = "";
 
         foreach (char c in text)
         {
             if (char.IsLetter(c))
             {
-                char basis = char.IsUpper(c) ? 'A' : 'a';
-                int offset = c - basis;
-                offset = (offset + shift + 26) % 26;
-                result.Append((char)(basis + offset));
+                // Get the base (A for uppercase, a for lowercase)
+                char baseChar = char.IsUpper(c) ? 'A' : 'a';
+
+                // Shift the character (subtract shift to decrypt)
+                int newPosition = (c - baseChar - shift + 26) % 26;
+                result += (char)(baseChar + newPosition);
             }
             else
             {
-                result.Append(c);
+                // Keep spaces, punctuation, etc. as-is
+                result += c;
             }
         }
 
-        return result.ToString();
+        return result;
     }
-}
-
-class SignalResponse
-{
-    public string Signal { get; set; }
 }
