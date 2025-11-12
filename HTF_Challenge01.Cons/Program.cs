@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using HTF_Challenge01.Cons;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -15,63 +16,39 @@ class Program
         client.DefaultRequestHeaders.Authorization =
         new AuthenticationHeaderValue("Team", $"{teamKey}");
 
-        var response = await client.GetAsync($"{baseUrl}/api/challenges/signal?isTest=true");
+        var response = await client.GetAsync($"{baseUrl}/api/challenges/pressure?isTest=true");
         var jsonResponse = await response.Content.ReadAsStringAsync();
 
-        Console.WriteLine("Response:");
-        Console.WriteLine(jsonResponse);
+        var data = JsonSerializer.Deserialize<Root>(jsonResponse);
 
-        var signalData = JsonSerializer.Deserialize<SignalResponse>(jsonResponse);
+        double density = 1025; // kg/m³
+        double gravity = 9.81; // m/s²
+        double depth = data.Pressure.Depth;
+        double pressure = density * gravity * depth;
 
-        string encryptedMessage = signalData?.CipherText ?? "";
-        int shift = signalData?.Shift ?? 0;
+        double submarineMass = data.Buoyancy.SubmarineMass;
+        double centerOfMassOffset = data.Buoyancy.CenterOfMassOffset;
+        double tankDistance = data.Buoyancy.TankDistance;
 
-        Console.WriteLine($"\nEncrypted: {encryptedMessage}");
-        Console.WriteLine($"Shift: {shift}");
+        double ballastMass = (submarineMass * centerOfMassOffset) / tankDistance;
 
-        // Step 3: Decrypt the message
-        string decryptedMessage = DecryptCaesar(encryptedMessage, shift);
+        var answer = new
+        {
+            pressure = pressure,
+            ballastMass = ballastMass
+        };
 
-        Console.WriteLine($"Decrypted: {decryptedMessage}");
-
-        // Step 4: POST the answer back
-        Console.WriteLine("\nSending answer...");
-
-        var answerData = new { answer = decryptedMessage };
         var jsonContent = new StringContent(
-            JsonSerializer.Serialize(answerData),
+            JsonSerializer.Serialize(answer),
             Encoding.UTF8,
             "application/json"
         );
 
-        var postResponse = await client.PostAsync($"{baseUrl}/api/challenges/signal", jsonContent);
+        var postResponse = await client.PostAsync($"{baseUrl}/api/challenges/pressure", jsonContent);
         var result = await postResponse.Content.ReadAsStringAsync();
 
-        Console.WriteLine($"API Response: {result}");
+        Console.WriteLine($"\nAPI Response: {result}");
+
     }
-
-    static string DecryptCaesar(string text, int shift)
-    {
-        string result = "";
-
-        foreach (char c in text)
-        {
-            if (char.IsLetter(c))
-            {
-                // Get the base (A for uppercase, a for lowercase)
-                char baseChar = char.IsUpper(c) ? 'A' : 'a';
-
-                // Shift the character (subtract shift to decrypt)
-                int newPosition = (c - baseChar - shift + 26) % 26;
-                result += (char)(baseChar + newPosition);
-            }
-            else
-            {
-                // Keep spaces, punctuation, etc. as-is
-                result += c;
-            }
-        }
-
-        return result;
-    }
+    
 }
