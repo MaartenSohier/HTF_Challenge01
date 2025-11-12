@@ -44,34 +44,18 @@ class Program
             "application/json"
         );
 
-        var postResponse = await client.PostAsync($"{baseUrl}/api/challenges/signal", jsonContent);
+        var postResponse = await client.PostAsync($"{baseUrl}/api/challenges/reparations", jsonContent);
+        
+        Console.WriteLine($"\nPOST Status Code: {postResponse.StatusCode}");
+        
         var result = await postResponse.Content.ReadAsStringAsync();
 
-        Console.WriteLine($"API Response: {result}");
-    }
-
-    static string DecryptCaesar(string text, int shift)
-    {
-        string result = "";
-
-        foreach (char c in text)
+        if (!postResponse.IsSuccessStatusCode)
         {
-            if (char.IsLetter(c))
-            {
-                // Get the base (A for uppercase, a for lowercase)
-                char baseChar = char.IsUpper(c) ? 'A' : 'a';
-
-                // Shift the character (subtract shift to decrypt)
-                int newPosition = (c - baseChar - shift + 26) % 26;
-                result += (char)(baseChar + newPosition);
-            }
-            else
-            {
-                // Keep spaces, punctuation, etc. as-is
-                result += c;
-            }
+            Console.WriteLine($"ERROR: POST request failed!");
+            Console.WriteLine($"Status: {postResponse.StatusCode}");
         }
-
-        return result;
+        
+        Console.WriteLine($"API Response: {result}");
     }
 }
